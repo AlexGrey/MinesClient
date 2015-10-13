@@ -9,6 +9,7 @@ public class ChatInfo : MonoBehaviour {
     public Text chatLogText;
     public InputField inputField;
     public Scrollbar scrollBar;
+    public Text amountOfPlayerOnline;
 
     private string message = "";
     private string chatLog = "";
@@ -16,11 +17,14 @@ public class ChatInfo : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         PhotonServer.Instance.OnRecieveChatMessage += OnRecieveChatMessage;
+        PhotonServer.Instance.OnRecieveAmountOfPlayers += OnRecieveAmountOfPlayers;
         PhotonServer.Instance.GetRecentChatMessage();
+        PhotonServer.Instance.GetAmountOfPlayers();
     }
 
     void OnDestroy() {
         PhotonServer.Instance.OnRecieveChatMessage -= OnRecieveChatMessage;
+        PhotonServer.Instance.OnRecieveAmountOfPlayers -= OnRecieveAmountOfPlayers;
     }
 	
 	// Update is called once per frame
@@ -32,6 +36,11 @@ public class ChatInfo : MonoBehaviour {
         chatLog += e.Message + "\r\n";
         chatLogText.text = chatLog;
         scrollBar.value = 0;
+    }
+
+    private void OnRecieveAmountOfPlayers(object o, AmountOfPlayersEventArgs e) {
+        Debug.Log(e.AmountOfPlayers);
+        amountOfPlayerOnline.text = e.AmountOfPlayers.ToString();
     }
 
     public void SendMessage() {

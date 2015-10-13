@@ -20,6 +20,7 @@ public class PhotonServer : MonoBehaviour, IPhotonPeerListener {
 
     public event EventHandler<LoginEventArgs> OnLoginResponse;
     public event EventHandler<ChatMessageEventArgs> OnRecieveChatMessage;
+    public event EventHandler<AmountOfPlayersEventArgs> OnRecieveAmountOfPlayers;
 
 
     void Awake() {
@@ -69,6 +70,10 @@ public class PhotonServer : MonoBehaviour, IPhotonPeerListener {
             case (byte)EventCode.ChatMessage:
                 ChatMessageHandler(eventData);
                 break;
+            case (byte)EventCode.AmountOfPlayers:
+                Debug.Log("AmountOfPlayers operation: " + eventData.Code);
+                AmountOfPlayerHandler(eventData);
+                break;
             default:
                 Debug.Log("Unknown operation: " + eventData.Code);
                 break;
@@ -101,6 +106,7 @@ public class PhotonServer : MonoBehaviour, IPhotonPeerListener {
 
     }
 
+
     public void SendLoginOperation(string name) {
         PhotonPeer.OpCustom((byte)OperationCode.Login, new Dictionary<byte, object> { {(byte)ParameterCode.CharacterName, name } }, true);
     }
@@ -112,6 +118,11 @@ public class PhotonServer : MonoBehaviour, IPhotonPeerListener {
     public void GetRecentChatMessage() {
         PhotonPeer.OpCustom((byte)OperationCode.GetRecentChatMessage, new Dictionary<byte, object> { { (byte)ParameterCode.ChatMessage, "" } }, true);
     }
+
+    public void GetAmountOfPlayers() {
+        PhotonPeer.OpCustom((byte)OperationCode.GetAmountOfPlayers, new Dictionary<byte, object> { { (byte)ParameterCode.AmountOfPlayer, "" } }, true);
+    }
+
 
     private void LoginHandler(OperationResponse operationResponse) {
         if (operationResponse.ReturnCode != 0) {
@@ -147,6 +158,14 @@ public class PhotonServer : MonoBehaviour, IPhotonPeerListener {
 
         if (OnRecieveChatMessage != null) {
             OnRecieveChatMessage(this, new ChatMessageEventArgs(message));
+        }
+    }
+
+    private void AmountOfPlayerHandler(EventData eventData) {
+        int amount = (int)eventData.Parameters[(byte)ParameterCode.AmountOfPlayer];
+
+        if (OnRecieveAmountOfPlayers != null) {
+            OnRecieveAmountOfPlayers(this, new AmountOfPlayersEventArgs(amount));
         }
     }
 }
